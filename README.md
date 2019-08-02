@@ -1,5 +1,5 @@
 # Sudoku-Solver-and-Generator
-A Sudoku solver and generator written using JavaScript and canvas
+A Sudoku solver and generator written using JavaScript and Canvas
 See it in action at https://cs.mcgill.ca/~ysarto/projectsDir/sudoku
 ## Goals
 My father told me to make this to impress my grand-parents, since they are both quite fond Sudoku. My goals with this project were as follows:
