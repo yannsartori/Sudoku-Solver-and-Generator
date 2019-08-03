@@ -8,7 +8,7 @@ My father told me to make this to impress my grand-parents, since they are both 
 - practicing my problem solving skills in terms of algorithms
 ## On what can be improved
 The following below are organized in increasing order of difficulty/feasability
-- adding a hint button
+- ~~adding a hint button~~ (*implemented*)
 - caching example boards for quicker generation and creating them in the background
 - using a faster solver algorithm to improve generation speeds (also prevents people from giving mean examples ): )
 
