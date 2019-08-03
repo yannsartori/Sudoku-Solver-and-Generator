@@ -1,7 +1,12 @@
+/*
+* TODO: fix the hint stuff
+*/
+
 //The following below deals with model
 const TILE_SIZE = 50;
 const TILE_COUNT = 9;
 let grid = [];
+let solution = null;
 let lastTilePlayed = [0, 0]; //to speed up solving
 let generated = false; //used for determining if a user is inputting a hint or not (i.e. they want to solve or are solving a generated)
 function Tile(value, fixed) {
@@ -113,7 +118,7 @@ function generateSudoku() {
     }
   }
   let oldOldBoard = null; //used to be sure we have no duplicate solutions.
-  let oldSolvedGrid = deepCopy(grid);
+  solution = deepCopy(grid);
   let difficulty = +prompt("What difficulty would you like (1-15)?", "1");
   if (isNaN(difficulty) || difficulty < 1) difficulty = 1;
   else if (difficulty > 13) difficulty = 13; //don't question it...
@@ -139,7 +144,7 @@ function generateSudoku() {
       let k = 0;
       for (k; k < DUP_CHECK; k++) { //checks the number of solutions.
         _solveSudoku();
-        if (!checkGridEquality(oldSolvedGrid)) break;
+        if (!checkGridEquality(solution)) break;
         grid = deepCopy(oldGrid); //resets so we can solve
         grid[i][j].value = 0;
       }
@@ -181,6 +186,35 @@ function checkGridEquality(oldGrid) {
   }
   return true;
 }
+function generateHint() {
+  //gets free positions
+  let freePositions = [];
+  for (let i = 0; i < TILE_COUNT; i++) {
+    freePositions.push([])
+    freePositions[i].push(i);
+    for (let j = 0; j < TILE_COUNT; j++) {
+      if (grid[i][j].value === 0) freePositions[i].push(j);
+    }
+  }
+  for (let i = 0; i < freePositions.length; i++) {
+    if (freePositions[i].length === 1) freePositions.splice(i--, 1);
+  }
+  let iPos = Math.floor(Math.random() * freePositions.length);
+  let i = freePositions[iPos][0];
+  let jPos = Math.floor((Math.random() * (freePositions[iPos].length - 1)) + 1);
+  let j = freePositions[iPos][jPos];
+  grid[i][j].value = solution[i][j].value;
+  grid[i][j].fixed = false;
+  draw();
+}
+function checkSquare(i, j, drawGreen) {
+  if (i !== -1 && j !== -1) {
+    if (grid[i][j].fixed) return;
+    if (grid[i][j].value !== solution[i][j].value) drawSquareColour(i, j, "red");
+    else if (drawGreen) drawSquareColour(i, j, "lime");
+  }
+}
+
 //The following below deals with view
 let canvas = document.getElementById("main");
 let ctx = canvas.getContext("2d");
@@ -212,11 +246,14 @@ function draw() {
     }
   }
 }
-function drawSquareBlue(i, j) {
+function drawSquareColour(i, j, style) {
   ctx.save();
-  ctx.fillStyle = "LightSkyBlue";
+  ctx.fillStyle = style;
   ctx.beginPath();
   ctx.fillRect(1.5 * ctx.lineWidth + (TILE_SIZE) * j, 1.5 * ctx.lineWidth + (TILE_SIZE) * i, TILE_SIZE - ctx.lineWidth, TILE_SIZE - ctx.lineWidth);
+  ctx.fillStyle = (grid[i][j].fixed) ? "black" : "gray";
+  ctx.font = `${fontSize}px Lucida Console`
+  ctx.fillText((grid[i][j].value !== 0) ? grid[i][j].value : "", ctx.lineWidth + (TILE_SIZE) * j + TILE_SIZE * 0.5 - fontSize * .25, ctx.lineWidth + (TILE_SIZE) * i + TILE_SIZE * 0.5 + fontSize * .25); 
   ctx.restore();
 }
 //The following below deals with controller
@@ -229,11 +266,12 @@ canvas.addEventListener("click", function(event) {
   selectedTile = (0 <= i && i < TILE_COUNT && 0 <= j && j < TILE_COUNT) ? [i,j] : [-1, -1];
   if (selectedTile[0] !== -1 && selectedTile[1] != -1) {
     draw();
-    drawSquareBlue(selectedTile[0], selectedTile[1]);
+    drawSquareColour(selectedTile[0], selectedTile[1], "LightSkyBlue");
   }
 });
 canvas.addEventListener("keydown", function(event) {
   if (selectedTile[0] !== -1 && selectedTile[1] !== -1) {
+    if (generated && grid[selectedTile[0]][selectedTile[1]].fixed && grid[selectedTile[0]][selectedTile[1]].value !== 0) return;
     if (event.key === "Backspace") {
       grid[selectedTile[0]][selectedTile[1]] = new Tile(0, !generated);
       draw();
@@ -245,17 +283,29 @@ canvas.addEventListener("keydown", function(event) {
   }
 });
 canvas.addEventListener("keydown", event => {
-  if (event.key !== "s") return;
+  if (event.key !== "s") return; //(S)olve
   solveSudoku();
   draw();
 });
 canvas.addEventListener("keydown", event => {
-  if (event.key !== "c") return;
+  if (event.key !== "c") return; //(C)lear
   clearSudoku(true);
   draw();
 });
 canvas.addEventListener("keydown", event => {
-  if (event.key !== "g") return;
+  if (event.key !== "g") return; //(G)enerate
   generateSudoku();
+});
+canvas.addEventListener("keydown", event => {
+  if (event.key !== "h") return; //(H)int
+  generateHint();
+});
+canvas.addEventListener("keydown", event => {
+  if (event.key !== "k") return; //Chec(k) square
+  checkSquare(selectedTile[0], selectedTile[1], true);
+});
+canvas.addEventListener("keydown", event => {
+  if (event.key !== "b") return; //Check (B)oard
+  for (let i = 0; i < grid.length; i++) for (let j = 0; j < grid[i].length; j++) checkSquare(i, j, false);
 });
 setUpGrid();
