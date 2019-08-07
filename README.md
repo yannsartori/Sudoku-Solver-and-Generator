@@ -2,7 +2,7 @@
 A Sudoku solver and generator written using JavaScript and Canvas
 See it in action at https://cs.mcgill.ca/~ysarto/projectsDir/sudoku
 ## Goals
-My father told me to make this to impress my grand-parents, since they are both quite fond Sudoku. My goals with this project were as follows:
+My father told me to make this to impress my grand-parents, since they are both quite fond of Sudoku. My goals with this project were as follows:
 - again, further using MVC
 - this was my first implementation of a back-track algorithm
 - practicing my problem solving skills in terms of algorithms
